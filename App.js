@@ -9,6 +9,7 @@ class App extends Component {
       viewAccounts: true,  // showing accounts on start
       accountList: [],     // creating accounts list
       transactionList: [],  // creating transactions list
+      elementList: [],
       modal: false,   // activating modal for creating account
       madal2: false,  // activating modal for creating transaction
       // transaction elements
@@ -32,6 +33,7 @@ class App extends Component {
     this.refreshList();
     this.refreshTransaction ();
   }
+
   // calling all the accounts in the list
   refreshList = () => {
     axios
@@ -39,6 +41,7 @@ class App extends Component {
       .then((res) => this.setState({ accountList: res.data }))
       .catch((err) => console.log(err));
   };
+
   // calling all the transactions 
   refreshTransaction = () => {
     axios
@@ -47,7 +50,7 @@ class App extends Component {
       .catch((err) => console.log(err));
   };
 
-  // toggle 
+  // toggle. this crashes the project
   toggle = () => {
     this.setState({ modal: !this.state.modal });
   };
@@ -97,30 +100,23 @@ class App extends Component {
       .then((res) => this.refreshList());
   };
 
-    // create Transactions  
-    createTransaction = () => {
-      const transaction = { transactionFrom: "", transactionTo: "", transactionID: "", amount: "", tTime: ""};
-  
-      this.setState({ activeTransaction: transaction, modal: !this.state.modal }); 
-    };   
 
-  
+
+  // create Transactions  
+  createTransaction = () => {
+    const transaction = { transactionFrom: "", transactionTo: "", transactionID: "", amount: "", tTime: ""};
+
+    this.setState({ activeTransaction: transaction, modal: !this.state.modal }); 
+  };   
+
     
-  /* check if the account is created or not */
-  displayTransactions = (status) => {   
-    if (status) {
-      return this.setState({ viewAccounts: true });  
-    }
-    return this.setState({ viewAccounts: false });  
-  };
-
-
   // create account
   createAcount = () => {
     const account = { accountID: "", wallet: "" };
 
     this.setState({ activeCreate: account, modal: !this.state.modal });  
   };
+
   // editting  the account
   editAccount = (account) => {
     this.setState({ activeCreate: account, modal: !this.state.modal });  
@@ -129,9 +125,9 @@ class App extends Component {
   /* check if the account is created or not */
   displayAccounts = (status) => {   
     if (status) {
-      return this.setState({ viewAccounts: true });  
+      return this.setState({ viewAccounts: true });  // accounts list button
     }
-    return this.setState({ viewAccounts: false });  
+    return this.setState({ viewAccounts: false });   // transaction list button
   };
 
   // deciding which windows should be open (Send or Receive)
@@ -154,7 +150,34 @@ class App extends Component {
     );
   };
 
-  renderItems = () => {
+
+  renderTransactions = () => {
+    const { viewTransactions } = this.state;  
+    const newItems = this.state.transactionList.filter(
+      (item) => item.send === viewTransactions   
+    );
+      // this part is that display part
+      return newItems.map((transactions) => (
+        <li
+          key={transaction.transactionTo}
+          className="list-group-item d-flex justify-content-between align-items-center"
+        >
+          <span
+            className={`transactionID mr-2 ${
+              this.state.viewTransactions ? "completed-todo" : ""  
+            }`}
+            transactionFrom={transaction.transactionFrom}
+          >
+            ID {transaction.transactionID} , {transaction.tTime} $
+          </span>
+        </li>
+      ));
+    };
+
+
+
+  // render thru all the accounts lists
+  renderAccounts = () => {
     const { viewAccounts } = this.state;  
     const newItems = this.state.accountList.filter(
       (item) => item.send === viewAccounts   
@@ -210,12 +233,13 @@ class App extends Component {
                   className="btn btn-primary"
                   onClick={this.createAcount}
                 >
-                  Create Account
+                  Transaction
                 </button>
               </div>
               {this.renderTabList()}
               <ul className="list-group list-group-flush border-top-0">
-                {this.renderItems()}
+              {this.viewAccounts ? renderAccounts() : renderTransactions()}
+
               </ul>
             </div>
           </div>
